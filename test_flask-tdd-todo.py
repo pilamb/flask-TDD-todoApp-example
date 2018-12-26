@@ -37,7 +37,6 @@ class TodoAPPTestCase(unittest.TestCase):
         self.assertEqual(result.status_code, 200)
         self.assertIn('buy pinneapples', str(result.data))
 
-
     def test_bucketlist_can_be_edited(self):
         """Test API can edit an existing item"""
         rv = self.client().post(
