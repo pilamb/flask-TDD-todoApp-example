@@ -1,5 +1,4 @@
 import unittest
-import os
 import json
 from app import create_app, db
 
@@ -10,8 +9,11 @@ class TodoAPPTestCase(unittest.TestCase):
         self.client = self.app.test_client
         self.bucketlist = {'name': 'buy pinneapples for hell pizza.'}
 
-        with self.app.app_context():
-            db.create_all()
+        self.db_uri = 'sqlite:///test.db'
+        self.app.config['TESTING'] = True
+        self.app.config['WTF_CSRF_ENABLED'] = False
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = self.db_uri
+        db.create_all()
 
     def test_bucketlist_creation(self):
         """Test API can create"""

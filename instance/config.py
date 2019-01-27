@@ -17,8 +17,9 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     """Configurations for Testing, with a separate test database."""
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://testing_user:pass@localhost/test_db'
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     DEBUG = True
+
 
 class StagingConfig(Config):
     """Configurations for Staging."""
@@ -37,4 +38,3 @@ app_config = {
     'staging': StagingConfig,
     'production': ProductionConfig,
 }
-

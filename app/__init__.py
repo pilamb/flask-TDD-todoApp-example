@@ -1,21 +1,39 @@
-from flask import request, jsonify, abort
-from flask_api import FlaskAPI
+from flask import Flask, request, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
 
 from instance.config import app_config
+
 
 db = SQLAlchemy()
 
 
 def create_app(config_name):
     from app.models import Bucketlist
-    app = FlaskAPI(__name__, instance_relative_config=True)
+    app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(app_config[config_name])
     app.config.from_pyfile('config.py')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
 
-    @app.route('/todolist/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+    @app.route('/todolist_c/', methods=['POST', 'GET'])
+    def bucketlists():
+        if request.method == "POST":
+            name = str(request.data.get('name', ''))
+            if name:
+                bucket_list = Bucketlist(name=name)
+                bucket_list.save()
+                response = jsonify({
+                    'id': bucket_list.id,
+                    'name': bucket_list.name,
+                    'date_created': bucket_list.date_created,
+                    'date_modified': bucket_list.date_modified
+                })
+                response.status_code = 201
+                return response
+        else:
+            return jsonify(Bucketlist.get_all())
+
+    @app.route('/bucketlists/<int:id>', methods=['GET', 'PUT', 'DELETE'])
     def bucketlist_manipulation(id, **kwargs):
         # retrieve a buckelist using it's ID
         bucketlist = Bucketlist.query.filter_by(id=id).first()
@@ -26,8 +44,8 @@ def create_app(config_name):
         if request.method == 'DELETE':
             bucketlist.delete()
             return {
-                "message": "bucketlist {} deleted successfully".format(bucketlist.id)
-            }, 200
+                       "message": "bucketlist {} deleted successfully".format(bucketlist.id)
+                   }, 200
 
         elif request.method == 'PUT':
             name = str(request.data.get('name', ''))
